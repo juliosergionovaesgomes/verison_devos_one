@@ -1,24 +1,97 @@
-name: Deploy Infra + App
-
+name: DeployLocalStack
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  AWS_ACCESS_KEY_ID: giropops
+  AWS_SECRET_ACCESS_KEY: stringus
+  AWS_DEFAULT_REGION: us-east-1
+  LOCALSTACK_API_KEY: ${{ secrets.LOCALSTACK_API_KEY }}
 
 jobs:
   deploy:
+    name: Deploy to LocalStack
     runs-on: ubuntu-latest
-
+    
+    services:
+      localstack:
+        image: localstack/localstack:latest
+        ports:
+          - 4566:4566
+        env:
+          DEBUG: 1
+          DOCKER_HOST: unix:///var/run/docker.sock
+        options: >-
+          --health-cmd="curl -f http://localhost:4566/_localstack/health || exit 1"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+    
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: hashicorp/setup-terraform@v3
-
-      - run: terraform init
-        working-directory: infra
-
-      - run: terraform apply -auto-approve
-        working-directory: infra
-
-      - run: docker build -t app .
-
-      - run: docker push ECR_URL
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+          
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: 'npm'
+          
+      - name: Install LocalStack CLI
+        run: |
+          pip install localstack awscli-local
+          
+      - name: Wait for LocalStack to be ready
+        run: |
+          echo "Waiting for LocalStack to be ready..."
+          timeout 60s sh -c 'until curl -f http://localhost:4566/_localstack/health; do sleep 2; done'
+          echo "LocalStack is ready!"
+          
+      - name: Configure AWS CLI for LocalStack
+        run: |
+          aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+          aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+          aws configure set default.region $AWS_DEFAULT_REGION
+          
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.7"
+          
+      - name: Install Node.js dependencies
+        run: npm ci
+        
+      - name: Build Next.js application
+        run: npm run build
+        
+      - name: Initialize Terraform
+        working-directory: ./infra_terraform
+        run: terraform init
+        
+      - name: Plan Terraform deployment
+        working-directory: ./infra_terraform
+        run: terraform plan -var="use_localstack=true"
+        
+      - name: Deploy infrastructure to LocalStack
+        working-directory: ./infra_terraform
+        run: terraform apply -auto-approve -var="use_localstack=true"
+        
+      - name: Verify LocalStack deployment
+        run: |
+          echo "Checking LocalStack services..."
+          curl -f http://localhost:4566/_localstack/health
+          echo "Listing LocalStack resources..."
+          awslocal s3 ls || echo "No S3 buckets found"
+          awslocal ecr describe-repositories || echo "No ECR repositories found"
+          awslocal ecs list-clusters || echo "No ECS clusters found"
