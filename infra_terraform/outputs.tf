@@ -17,7 +17,7 @@ output "website_bucket_name" {
 
 output "website_url" {
   description = "URL of the S3 website"
-  value       = aws_s3_bucket_website_configuration.website.website_endpoint
+  value       = "http://${aws_s3_bucket.website.id}.s3-website.${var.region}.localhost.localstack.cloud:4566"
 }
 
 output "artifacts_bucket_name" {
@@ -25,22 +25,12 @@ output "artifacts_bucket_name" {
   value       = aws_s3_bucket.artifacts.id
 }
 
-output "lambda_function_name" {
-  description = "Name of the Lambda function"
-  value       = aws_lambda_function.api.function_name
-}
-
-output "api_gateway_url" {
-  description = "URL of the API Gateway"
-  value       = aws_api_gateway_deployment.api.invoke_url
-}
-
-output "security_group_lambda_id" {
-  description = "ID of the Lambda security group"
-  value       = aws_security_group.lambda.id
+output "security_group_web_id" {
+  description = "ID of the web security group"
+  value       = aws_security_group.web.id
 }
 
 output "cloudwatch_log_group" {
   description = "Name of the CloudWatch log group"
-  value       = aws_cloudwatch_log_group.lambda_logs.name
+  value       = aws_cloudwatch_log_group.app_logs.name
 }

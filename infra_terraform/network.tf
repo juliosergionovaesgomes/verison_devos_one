@@ -1,26 +1,7 @@
-# Security Group for Lambda (if VPC is needed)
-resource "aws_security_group" "lambda" {
-  name        = "lambda-sg"
-  description = "Security group for Lambda functions"
-  vpc_id      = aws_vpc.main.id
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name        = "lambda-sg"
-    Environment = "localstack"
-  }
-}
-
-# Security Group for API Gateway (if needed)
-resource "aws_security_group" "api_gateway" {
-  name        = "api-gateway-sg"
-  description = "Security group for API Gateway"
+# Basic Security Group for Web Traffic
+resource "aws_security_group" "web" {
+  name        = "web-sg"
+  description = "Security group for web traffic"
   vpc_id      = aws_vpc.main.id
 
   ingress {
@@ -45,7 +26,7 @@ resource "aws_security_group" "api_gateway" {
   }
 
   tags = {
-    Name        = "api-gateway-sg"
+    Name        = "web-sg"
     Environment = "localstack"
   }
 }

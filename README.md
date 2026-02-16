@@ -78,9 +78,7 @@ chmod +x setup-localstack.sh
 
 LocalStack is configured to emulate the following AWS services:
 - **S3** - Simple Storage Service (Website hosting & Artifacts)
-- **Lambda** - Serverless Functions
-- **API Gateway** - REST API endpoints
-- **IAM** - Identity and Access Management
+- **IAM** - Identity and Access Management (Basic user policies)
 - **EC2** - Elastic Compute Cloud (VPC & Networking)
 - **CloudWatch** - Logging and Monitoring
 
@@ -89,7 +87,7 @@ LocalStack is configured to emulate the following AWS services:
 - **Main Endpoint:** http://localhost:4566
 - **Health Check:** http://localhost:4566/_localstack/health
 - **Web UI:** http://localhost:4566/_localstack/cockpit (Pro version)
-- **Website URL:** http://verison-devos-one-website.s3-website.localhost.localstack.cloud:4566
+- **Website URL:** http://verison-devos-one-website.s3-website.us-east-1.localhost.localstack.cloud:4566
 
 ### Useful Commands
 
@@ -102,8 +100,7 @@ curl http://localhost:4566/_localstack/health
 ```bash
 awslocal s3 ls                       # List S3 buckets
 awslocal s3 ls s3://verison-devos-one-website  # List website files
-awslocal lambda list-functions       # List Lambda functions
-awslocal apigateway get-rest-apis     # List API Gateway APIs
+awslocal s3api get-bucket-website --bucket verison-devos-one-website  # Check website config
 ```
 
 **Deploy to LocalStack S3:**
@@ -116,9 +113,9 @@ npm run deploy:s3                    # Deploy Next.js build to S3
 The project includes a GitHub Actions workflow (`.github/workflows/deploy.yml`) that:
 1. Starts LocalStack as a service
 2. Installs dependencies and tools
-3. Deploys Terraform infrastructure (S3, Lambda, API Gateway)
+3. Deploys Terraform infrastructure (S3, VPC, IAM)
 4. Builds the Next.js application
-5. Deploys static files to S3 bucket
+5. Deploys static files to S3 bucket for website hosting
 6. Verifies deployment
 
 ### Troubleshooting

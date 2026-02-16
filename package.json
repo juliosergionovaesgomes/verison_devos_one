@@ -16,7 +16,7 @@
     "terraform:apply": "cd infra_terraform && terraform apply -auto-approve -var=\"use_localstack=true\"",
     "terraform:destroy": "cd infra_terraform && terraform destroy -auto-approve -var=\"use_localstack=true\"",
     "deploy:local": "npm run localstack:start && npm run terraform:apply && npm run build && npm run deploy:s3",
-    "deploy:s3": "awslocal s3 mb s3://verison-devos-one-website --endpoint-url=http://localhost:4566 || echo 'Bucket exists' && awslocal s3 sync .next/static s3://verison-devos-one-website/static --endpoint-url=http://localhost:4566"
+    "deploy:s3": "deploy-to-s3.bat"
   },
   "dependencies": {
     "next": "16.1.6",
