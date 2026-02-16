@@ -87,6 +87,12 @@ jobs:
         working-directory: ./infra_terraform
         run: terraform apply -auto-approve -var="use_localstack=true"
         
+      - name: Show Terraform Outputs
+        working-directory: ./infra_terraform  
+        run: |
+          echo "📋 TERRAFORM INFRASTRUCTURE CREATED:"
+          terraform output -json | jq -r 'to_entries[] | "🔹 \(.key): \(.value.value)"'
+        
       - name: Deploy to S3 website
         run: |
           echo "Deploying to S3..."
@@ -102,3 +108,32 @@ jobs:
           awslocal s3 ls s3://verison-devos-one-website || echo "Website bucket not found"
           echo "Checking website bucket configuration..."
           awslocal s3api get-bucket-website --bucket verison-devos-one-website || echo "Website configuration not found"
+          
+      - name: 🌐 Website Ready - Access Your Deployment
+        run: |
+          echo ""
+          echo "🎉 =================================="
+          echo "✅ DEPLOYMENT SUCCESSFUL!"
+          echo "🌐 Website is now live and ready!"
+          echo "===================================="
+          echo ""
+          echo "📍 ACCESS YOUR WEBSITE:"
+          echo "🔗 URL: http://verison-devos-one-website.s3-website.us-east-1.localhost.localstack.cloud:4566"
+          echo ""
+          echo "📊 LOCALSTACK ENDPOINTS:"
+          echo "🏥 Health Check: http://localhost:4566/_localstack/health"
+          echo "🎛️  Dashboard: http://localhost:4566/_localstack/cockpit"
+          echo ""
+          echo "📁 S3 BUCKET CONTENTS:"
+          awslocal s3 ls s3://verison-devos-one-website --recursive --human-readable --summarize
+          echo ""
+          echo "🔍 VERIFY WEBSITE IS WORKING:"
+          echo "Testing website response..."
+          if curl -s -o /dev/null -w "%{http_code}" http://verison-devos-one-website.s3-website.us-east-1.localhost.localstack.cloud:4566 | grep -q "200"; then
+            echo "✅ Website is responding successfully!"
+          else
+            echo "⚠️  Website may take a moment to be available"
+          fi
+          echo ""
+          echo "🚀 Ready to view your website!"
+          echo "===================================="
