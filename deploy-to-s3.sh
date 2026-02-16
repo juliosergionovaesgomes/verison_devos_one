@@ -57,9 +57,14 @@ awslocal s3api put-bucket-policy \
     }' \
     --endpoint-url=http://localhost:4566
 
-# Upload all Next.js static export files
-echo "📤 Syncing Next.js build to S3..."
-awslocal s3 sync out/ s3://verison-devos-one-website --endpoint-url=http://localhost:4566 --delete
+# Upload all Next.js static export files with proper Content-Type
+echo "📤 Syncing Next.js build to S3 with UTF-8 encoding..."
+awslocal s3 sync out/ s3://verison-devos-one-website --endpoint-url=http://localhost:4566 --delete \
+  --content-type "text/html; charset=utf-8" --exclude "*" --include "*.html" 
+
+# Upload other assets
+awslocal s3 sync out/ s3://verison-devos-one-website --endpoint-url=http://localhost:4566 --delete \
+  --exclude "*.html"
 
 echo "📊 Verifying uploaded files..."
 awslocal s3 ls s3://verison-devos-one-website --endpoint-url=http://localhost:4566 --recursive

@@ -51,8 +51,14 @@ aws s3 website s3://%BUCKET_NAME% --index-document index.html --error-document 4
 
 echo 📤 Fazendo upload dos arquivos do Next.js...
 
-REM Upload todos os arquivos da pasta out
-aws s3 sync %BUILD_DIR%/ s3://%BUCKET_NAME% --delete --endpoint-url=%ENDPOINT_URL%
+REM Upload todos os arquivos da pasta out com encoding correto
+echo 📤 Fazendo upload dos arquivos do Next.js com UTF-8...
+
+REM Upload HTML files with proper Content-Type
+aws s3 sync %BUILD_DIR%/ s3://%BUCKET_NAME% --delete --endpoint-url=%ENDPOINT_URL% --exclude "*" --include "*.html" --content-type "text/html; charset=utf-8"
+
+REM Upload other assets
+aws s3 sync %BUILD_DIR%/ s3://%BUCKET_NAME% --delete --endpoint-url=%ENDPOINT_URL% --exclude "*.html"
 
 echo 🔗 URLs do website:
 echo 📍 LocalStack S3 Website: http://%BUCKET_NAME%.s3-website.us-east-1.localhost.localstack.cloud:4566
