@@ -1,15 +1,8 @@
-# Security Group for ECS Tasks
-resource "aws_security_group" "ecs_tasks" {
-  name        = "ecs-tasks-sg"
-  description = "Security group for ECS tasks"
+# Security Group for Lambda (if VPC is needed)
+resource "aws_security_group" "lambda" {
+  name        = "lambda-sg"
+  description = "Security group for Lambda functions"
   vpc_id      = aws_vpc.main.id
-
-  ingress {
-    from_port   = 3000
-    to_port     = 3000
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
 
   egress {
     from_port   = 0
@@ -19,15 +12,15 @@ resource "aws_security_group" "ecs_tasks" {
   }
 
   tags = {
-    Name        = "ecs-tasks-sg"
+    Name        = "lambda-sg"
     Environment = "localstack"
   }
 }
 
-# Security Group for ALB (if needed later)
-resource "aws_security_group" "alb" {
-  name        = "alb-sg"
-  description = "Security group for Application Load Balancer"
+# Security Group for API Gateway (if needed)
+resource "aws_security_group" "api_gateway" {
+  name        = "api-gateway-sg"
+  description = "Security group for API Gateway"
   vpc_id      = aws_vpc.main.id
 
   ingress {
@@ -52,7 +45,7 @@ resource "aws_security_group" "alb" {
   }
 
   tags = {
-    Name        = "alb-sg"
+    Name        = "api-gateway-sg"
     Environment = "localstack"
   }
 }

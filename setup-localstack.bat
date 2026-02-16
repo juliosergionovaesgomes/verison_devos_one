@@ -57,6 +57,8 @@ npm run terraform:apply
 
 echo ✅ Setup complete! LocalStack is running at http://localhost:4566
 echo 🔍 You can check the health status at: http://localhost:4566/_localstack/health
+echo 🌐 Website will be available at: http://verison-devos-one-website.s3-website.localhost.localstack.cloud:4566
 echo 📊 Use 'npm run localstack:logs' to see LocalStack logs
+echo 🚀 Use 'npm run deploy:s3' to deploy to S3
 echo 🛑 Use 'npm run localstack:stop' to stop LocalStack
 pause

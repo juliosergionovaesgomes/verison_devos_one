@@ -87,11 +87,30 @@ jobs:
         working-directory: ./infra_terraform
         run: terraform apply -auto-approve -var="use_localstack=true"
         
+      - name: Export Next.js as static files
+        run: |
+          echo "Exporting Next.js application as static files..."
+          npm run build
+          
+      - name: Upload static files to S3
+        run: |
+          echo "Uploading static files to LocalStack S3..."
+          awslocal s3 mb s3://verison-devos-one-website || echo "Bucket already exists"
+          awslocal s3 sync .next/static s3://verison-devos-one-website/static
+          # For Next.js static export, copy all files
+          if [ -d "out" ]; then
+            awslocal s3 sync out/ s3://verison-devos-one-website/
+          else
+            # Copy build files manually for Next.js
+            awslocal s3 cp .next/server/pages/index.html s3://verison-devos-one-website/index.html || echo "Index file not found in expected location"
+          fi
+        
       - name: Verify LocalStack deployment
         run: |
           echo "Checking LocalStack services..."
           curl -f http://localhost:4566/_localstack/health
           echo "Listing LocalStack resources..."
           awslocal s3 ls || echo "No S3 buckets found"
-          awslocal ecr describe-repositories || echo "No ECR repositories found"
-          awslocal ecs list-clusters || echo "No ECS clusters found"
+          awslocal s3 ls s3://verison-devos-one-website || echo "Website bucket not found"
+          awslocal lambda list-functions || echo "No Lambda functions found"
+          awslocal apigateway get-rest-apis || echo "No API Gateway APIs found"

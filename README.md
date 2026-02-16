@@ -77,17 +77,19 @@ chmod +x setup-localstack.sh
 ### LocalStack Services
 
 LocalStack is configured to emulate the following AWS services:
-- **ECR** - Elastic Container Registry
-- **ECS** - Elastic Container Service
+- **S3** - Simple Storage Service (Website hosting & Artifacts)
+- **Lambda** - Serverless Functions
+- **API Gateway** - REST API endpoints
 - **IAM** - Identity and Access Management
-- **EC2** - Elastic Compute Cloud
-- **VPC** - Virtual Private Cloud
+- **EC2** - Elastic Compute Cloud (VPC & Networking)
+- **CloudWatch** - Logging and Monitoring
 
 ### Accessing LocalStack
 
 - **Main Endpoint:** http://localhost:4566
 - **Health Check:** http://localhost:4566/_localstack/health
 - **Web UI:** http://localhost:4566/_localstack/cockpit (Pro version)
+- **Website URL:** http://verison-devos-one-website.s3-website.localhost.localstack.cloud:4566
 
 ### Useful Commands
 
@@ -98,9 +100,15 @@ curl http://localhost:4566/_localstack/health
 
 **List Resources with AWS Local:**
 ```bash
-awslocal s3 ls                    # List S3 buckets
-awslocal ecr describe-repositories # List ECR repositories
-awslocal ecs list-clusters        # List ECS clusters
+awslocal s3 ls                       # List S3 buckets
+awslocal s3 ls s3://verison-devos-one-website  # List website files
+awslocal lambda list-functions       # List Lambda functions
+awslocal apigateway get-rest-apis     # List API Gateway APIs
+```
+
+**Deploy to LocalStack S3:**
+```bash
+npm run deploy:s3                    # Deploy Next.js build to S3
 ```
 
 ### CI/CD with GitHub Actions
@@ -108,9 +116,10 @@ awslocal ecs list-clusters        # List ECS clusters
 The project includes a GitHub Actions workflow (`.github/workflows/deploy.yml`) that:
 1. Starts LocalStack as a service
 2. Installs dependencies and tools
-3. Deploys Terraform infrastructure
+3. Deploys Terraform infrastructure (S3, Lambda, API Gateway)
 4. Builds the Next.js application
-5. Verifies deployment
+5. Deploys static files to S3 bucket
+6. Verifies deployment
 
 ### Troubleshooting
 
