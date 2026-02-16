@@ -15,8 +15,6 @@ provider "aws" {
     for_each = var.use_localstack ? [1] : []
     content {
       s3           = "http://localhost:4566"
-      lambda       = "http://localhost:4566"
-      apigateway   = "http://localhost:4566"
       iam          = "http://localhost:4566"
       ec2          = "http://localhost:4566"
       logs         = "http://localhost:4566"
@@ -31,10 +29,6 @@ terraform {
     aws = {
       source  = "hashicorp/aws"
       version = "~> 5.0"
-    }
-    archive = {
-      source  = "hashicorp/archive"
-      version = "~> 2.0"
     }
   }
 }
